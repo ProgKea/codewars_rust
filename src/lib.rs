@@ -85,6 +85,66 @@ impl Solution {
 
         return solution;
     }
+
+    fn printer_error(s: &str) -> String {
+        let alphabet = "abcdefghijklmnopqrstuvwxyz";
+        let mut errors = 0;
+
+        for char in s.chars() {
+            if alphabet.find(char.to_ascii_lowercase()).unwrap() > 12 {
+                errors += 1;
+            }
+        }
+
+        return format!("{}/{}", errors, s.len());
+    }
+
+    fn expanded_form(n: u64) -> String {
+        let ohs = n.to_string().len() - 1;
+        let mut solution = String::new();
+
+        for (i, num) in n.to_string().chars().enumerate() {
+            if num != '0' {
+                solution.push_str(&(num.to_string() + &"0".repeat(ohs - i) + " + "));
+            }
+        }
+
+        return solution.split_at(solution.len() - 3).0.to_string();
+    }
+
+    fn spin_words(words: &str) -> String {
+        let mut solution = String::new();
+
+        for word in words.split_whitespace() {
+            if word.len() >= 5 {
+                solution.push_str(&word.chars().rev().collect::<String>());
+                solution.push(' ');
+            } else {
+                solution.push_str(word);
+                solution.push(' ');
+            }
+        }
+
+        solution.pop();
+        return solution;
+    }
+
+    fn comp(a: Vec<i64>, b: Vec<i64>) -> bool {
+        let mut a_squared: Vec<i64> = a.iter().map(|x| x * x).collect();
+        let mut b_sorted: Vec<i64> = b.clone();
+
+        a_squared.sort();
+        b_sorted.sort();
+
+        return a_squared == b_sorted;
+    }
+
+    fn persistence(num: u64) -> u64 {
+        let mut num1: u64 = num;
+        let mut n: u64 = 0;
+        
+        return n;
+    }
 }
 
 #[cfg(test)]
@@ -206,6 +266,97 @@ mod tests {
             "20 8 5 14 1 18 23 8 1 12 2 1 3 15 14 19 1 20 13 9 4 14 9 7 8 20".to_string()
         );
     }
-}
 
-fn main() {}
+    #[test]
+    fn test_printer_error() {
+        assert_eq!(
+            &Solution::printer_error("aaaaaaaaaaaaaaaabbbbbbbbbbbbbbbbbbmmmmmmmmmmmmmmmmmmmxyz"),
+            "3/56"
+        );
+        assert_eq!(
+            &Solution::printer_error(
+                "kkkwwwaaaaaaaaaaaaaabbbbbbbbbbbbbbbbbbmmmmmmmmmmmmmmmmmmmxyz"
+            ),
+            "6/60"
+        );
+        assert_eq!(
+            &Solution::printer_error(
+                "kkkwwwaaaaaaaaaaaaaabbbbbbbbbbbbbbbbbbmmmmmmmmmmmmmmmmmmmxyzuuuuu"
+            ),
+            "11/65"
+        );
+    }
+
+    #[test]
+    fn test_expanded_form() {
+        assert_eq!(Solution::expanded_form(12), "10 + 2");
+        assert_eq!(Solution::expanded_form(42), "40 + 2");
+        assert_eq!(Solution::expanded_form(70304), "70000 + 300 + 4");
+    }
+
+    #[test]
+    fn test_spin_words() {
+        assert_eq!(Solution::spin_words("Welcome"), "emocleW");
+        assert_eq!(
+            Solution::spin_words("Hey fellow warriors"),
+            "Hey wollef sroirraw"
+        );
+        assert_eq!(Solution::spin_words("This is a test"), "This is a test");
+        assert_eq!(
+            Solution::spin_words("This is another test"),
+            "This is rehtona test"
+        );
+        assert_eq!(
+            Solution::spin_words("You are almost to the last test"),
+            "You are tsomla to the last test"
+        );
+        assert_eq!(
+            Solution::spin_words("Just kidding there is still one more"),
+            "Just gniddik ereht is llits one more"
+        );
+        assert_eq!(
+            Solution::spin_words("Seriously this is the last one"),
+            "ylsuoireS this is the last one"
+        );
+    }
+
+    fn testing_comp(a: Vec<i64>, b: Vec<i64>, exp: bool) -> () {
+        assert_eq!(Solution::comp(a, b), exp)
+    }
+
+    #[test]
+    fn test_comp() {
+        let a1 = vec![121, 144, 19, 161, 19, 144, 19, 11];
+        let a2 = vec![
+            11 * 11,
+            121 * 121,
+            144 * 144,
+            19 * 19,
+            161 * 161,
+            19 * 19,
+            144 * 144,
+            19 * 19,
+        ];
+        testing_comp(a1, a2, true);
+        let a1 = vec![121, 144, 19, 161, 19, 144, 19, 11];
+        let a2 = vec![
+            11 * 21,
+            121 * 121,
+            144 * 144,
+            19 * 19,
+            161 * 161,
+            19 * 19,
+            144 * 144,
+            19 * 19,
+        ];
+        testing_comp(a1, a2, false);
+    }
+
+    #[test]
+    fn test_persistence() {
+        assert_eq!(Solution::persistence(39), 3);
+        assert_eq!(Solution::persistence(4), 0);
+        assert_eq!(Solution::persistence(25), 2);
+        assert_eq!(Solution::persistence(999), 4);
+    }
+}
