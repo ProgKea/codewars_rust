@@ -139,11 +139,17 @@ impl Solution {
         return a_squared == b_sorted;
     }
 
-    fn persistence(num: u64) -> u64 {
-        let mut num1: u64 = num;
-        let mut n: u64 = 0;
-        
-        return n;
+    fn break_camelcase(s: &str) -> String {
+        let mut solution = String::new();
+
+        for char in s.chars() {
+            if char.is_uppercase() {
+                solution.push(' ');
+            }
+            solution.push(char);
+        }
+
+        return solution;
     }
 }
 
@@ -353,10 +359,11 @@ mod tests {
     }
 
     #[test]
-    fn test_persistence() {
-        assert_eq!(Solution::persistence(39), 3);
-        assert_eq!(Solution::persistence(4), 0);
-        assert_eq!(Solution::persistence(25), 2);
-        assert_eq!(Solution::persistence(999), 4);
+    fn test_break_camelcase() {
+        assert_eq!(Solution::break_camelcase("camelCasing"), "camel Casing");
+        assert_eq!(
+            Solution::break_camelcase("camelCasingTest"),
+            "camel Casing Test"
+        );
     }
 }
