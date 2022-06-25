@@ -1,6 +1,8 @@
 #![allow(dead_code)]
 
 pub struct Solution;
+use rand::Rng;
+use std::collections::BTreeMap;
 
 impl Solution {
     fn gimme(input_array: [i32; 3]) -> usize {
@@ -150,6 +152,129 @@ impl Solution {
         }
 
         return solution;
+    }
+
+    fn pyramid(n: usize) -> Vec<Vec<u32>> {
+        if n == 0 {
+            return vec![];
+        }
+        let mut solution: Vec<Vec<u32>> = vec![vec![1]];
+
+        for _ in 0..n - 1 {
+            let mut new_vec = solution.last().unwrap().to_vec();
+            new_vec.push(1);
+            solution.push(new_vec);
+        }
+
+        return solution;
+    }
+
+    fn dead_fish(code: &str) -> Vec<i32> {
+        let mut solution: Vec<i32> = Vec::new();
+        let mut n = 0;
+
+        for ch in code.chars() {
+            match ch {
+                'i' => n += 1,
+                'd' => n -= 1,
+                's' => n *= n,
+                'o' => solution.push(n),
+                _ => {}
+            };
+        }
+
+        return solution;
+    }
+
+    fn digital_root(n: i64) -> i64 {
+        let mut solution: i64 = n;
+
+        while solution >= 10 {
+            solution = solution.to_string().chars().fold(0 as i64, |acc, x| {
+                acc + x.to_string().parse::<i64>().unwrap()
+            });
+        }
+
+        return solution;
+    }
+
+    fn parts_sums(ls: &[u64]) -> Vec<u64> {
+        if ls.is_empty() {
+            return vec![0];
+        }
+        let mut ls1 = ls.to_vec();
+        let mut solution: Vec<u64> = Vec::new();
+
+        while ls1.len() != 0 {
+            solution.push(ls1.iter().fold(0 as u64, |a, x| a + x));
+            ls1.remove(0);
+        }
+
+        solution.push(0);
+        return solution;
+    }
+
+    fn is_prime(n: i64) -> bool {
+        if n <= 1 {
+            return false;
+        }
+        for a in 2..n {
+            if n % a == 0 {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    fn find_smallest_prime(n: i64) -> i64 {
+        let mut smallest_prime = 2;
+
+        while n % smallest_prime != 0 && !Self::is_prime(n) {
+            smallest_prime += 1;
+        }
+
+        return smallest_prime;
+    }
+
+    fn prime_factors(n: i64) -> String {
+        if Self::is_prime(n) {
+            return "(".to_string() + &n.to_string() + &")".to_string();
+        }
+
+        let mut primes: BTreeMap<i64, u64> = BTreeMap::new();
+        let mut n1 = n;
+        let mut smallest_prime = Self::find_smallest_prime(n1);
+        let mut formula = String::new();
+        primes.insert(smallest_prime, 1);
+        dbg!(n);
+
+        while !Self::is_prime(n1 / smallest_prime) {
+            n1 = n1 / smallest_prime;
+            smallest_prime = Self::find_smallest_prime(n1);
+            primes
+                .entry(smallest_prime)
+                .and_modify(|counter| *counter += 1)
+                .or_insert(1);
+        }
+        primes
+            .entry(n1 / smallest_prime)
+            .and_modify(|counter| *counter += 1)
+            .or_insert(1);
+
+        for prime in primes {
+            formula.push('(');
+            if prime.1 == 1 {
+                formula.push_str(&prime.0.to_string());
+            } else {
+                formula.push_str(&prime.0.to_string());
+                formula.push_str("**");
+                formula.push_str(&prime.1.to_string());
+            }
+            formula.push(')');
+        }
+
+        return formula;
     }
 }
 
@@ -366,4 +491,65 @@ mod tests {
             "camel Casing Test"
         );
     }
+
+    #[test]
+    fn test_pyramid() {
+        assert_eq!(Solution::pyramid(0), vec![] as Vec<Vec<u32>>);
+        assert_eq!(Solution::pyramid(1), vec![vec![1]]);
+        assert_eq!(Solution::pyramid(2), vec![vec![1], vec![1, 1]]);
+        assert_eq!(
+            Solution::pyramid(3),
+            vec![vec![1], vec![1, 1], vec![1, 1, 1]]
+        );
+    }
+
+    #[test]
+    fn test_deadfish() {
+        assert_eq!(Solution::dead_fish("iiisdoso"), vec![8, 64]);
+        assert_eq!(Solution::dead_fish("iiisdosodddddiso"), vec![8, 64, 3600]);
+    }
+
+    #[test]
+    fn test_digital_root() {
+        assert_eq!(Solution::digital_root(16), 7);
+    }
+
+    fn dotest(ls: Vec<u64>, expect: Vec<u64>) {
+        let actual = Solution::parts_sums(&ls);
+        assert_eq!(actual, expect);
+    }
+
+    #[test]
+    fn test_parts_sums() {
+        dotest(vec![], vec![0]);
+        dotest(vec![0, 1, 3, 6, 10], vec![20, 20, 19, 16, 10, 0]);
+        dotest(vec![1, 2, 3, 4, 5, 6], vec![21, 20, 18, 15, 11, 6, 0]);
+        dotest(
+            vec![
+                744125, 935, 407, 454, 430, 90, 144, 6710213, 889, 810, 2579358,
+            ],
+            vec![
+                10037855, 9293730, 9292795, 9292388, 9291934, 9291504, 9291414, 9291270, 2581057,
+                2580168, 2579358, 0,
+            ],
+        );
+    }
+
+    #[test]
+    fn test_prime_factors() {
+        assert_eq!(Solution::prime_factors(75), "(3)(5**2)");
+        assert_eq!(
+            Solution::prime_factors(7775460),
+            "(2**2)(3**3)(5)(7)(11**2)(17)"
+        );
+        assert_eq!(
+            Solution::prime_factors(17 * 17 * 93 * 677),
+            "(3)(17**2)(31)(677)"
+        );
+    }
+}
+
+fn main() {
+    let random_number = rand::thread_rng().gen_range(1..=9000000);
+    println!("{}", Solution::prime_factors(random_number));
 }
