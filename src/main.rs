@@ -1,8 +1,35 @@
 #![allow(dead_code)]
 
 pub struct Solution;
-use rand::Rng;
 use std::collections::BTreeMap;
+
+#[derive(Debug, Copy, Clone)]
+enum TimeT {
+    Second,
+    Minute,
+    Hour,
+    Day,
+    Year
+}
+
+#[derive(Debug, Copy, Clone)]
+struct Time {
+    max: u64,
+    count: u64,
+    kind: TimeT,
+}
+
+impl Time {
+    fn get_name(&self) -> String {
+        return match self.kind {
+            TimeT::Second => "second".to_owned(),
+            TimeT::Minute => "minute".to_owned(),
+            TimeT::Hour => "hour".to_owned(),
+            TimeT::Day => "day".to_owned(),
+            TimeT::Year => "year".to_owned(),
+        };
+    }
+}
 
 impl Solution {
     fn gimme(input_array: [i32; 3]) -> usize {
@@ -276,6 +303,85 @@ impl Solution {
 
         return formula;
     }
+
+    fn contains_numbers(a: u64, b: u64) -> bool {
+        let mut a = a.to_string();
+        for num in b.to_string().chars() {
+            if !a.contains(num) {
+                return false;
+            }
+            a.remove(a.find(num).unwrap());
+        }
+        return true;
+    }
+
+    fn next_smaller_number(n: u64) -> Option<u64> {
+        for i in (0..n).rev() {
+            if Self::contains_numbers(i, n) {
+                return Some(i);
+            }
+        }
+        return None;
+    }
+
+    fn format_duration(seconds: u64) -> String {
+        if seconds == 0 {
+            return "now".to_owned();
+        }
+        let mut times: Vec<Time> = Vec::new();
+        times.push(Time {
+            max: 60,
+            count: seconds,
+            kind: TimeT::Second,
+        });
+        times.push(Time {
+            max: 60,
+            count: 0,
+            kind: TimeT::Minute,
+        });
+        times.push(Time {
+            max: 24,
+            count: 0,
+            kind: TimeT::Hour,
+        });
+        times.push(Time {
+            max: 365,
+            count: 0,
+            kind: TimeT::Day,
+        });
+        times.push(Time {
+            max: 999,
+            count: 0,
+            kind: TimeT::Year
+        });
+
+        let mut result = String::new();
+
+        for (i, _) in times.clone().iter().enumerate() {
+            if i != times.len() - 1 {
+                let amount = times[i].count / times[i].max;
+                times[i].count -= amount * times[i].max;
+                times[i + 1].count += amount;
+            }
+        }
+
+        for t in times.iter().rev() {
+            if t.count == 1 {
+                result.push_str(&format!("{} {}, ", t.count, t.get_name()));
+            } else if t.count > 1 {
+                result.push_str(&format!("{} {}s, ", t.count, t.get_name()));
+            }
+        }
+
+        result = result.trim().to_owned();
+        result.pop();
+
+        result = result.chars().rev().collect::<String>();
+        result = result.replacen(",", "dna ", 1);
+        result = result.chars().rev().collect::<String>();
+
+        return result;
+    }
 }
 
 #[cfg(test)]
@@ -547,9 +653,15 @@ mod tests {
             "(3)(17**2)(31)(677)"
         );
     }
+
+    #[test]
+    fn test_next_smaller_number() {
+        assert_eq!(Some(12), Solution::next_smaller_number(21));
+        assert_eq!(Some(790), Solution::next_smaller_number(907));
+        assert_eq!(Some(513), Solution::next_smaller_number(531));
+        assert_eq!(None, Solution::next_smaller_number(1027));
+        assert_eq!(Some(414), Solution::next_smaller_number(441));
+    }
 }
 
-fn main() {
-    let random_number = rand::thread_rng().gen_range(1..=9000000);
-    println!("{}", Solution::prime_factors(random_number));
-}
+fn main() {}

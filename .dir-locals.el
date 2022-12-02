@@ -1,0 +1,12 @@
+((prog-mode . (
+               (com1 . "cargo run")
+               (com2 . "cargo test -- --nocapture")
+               (com3 . "")
+               (com4 . "")
+               (com5 . "")
+               (com6 . "")
+               (com7 . "")
+               (com8 . "")
+               (com9 . "")
+               (com0 . "")
+               )))
